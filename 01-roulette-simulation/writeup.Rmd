@@ -1,0 +1,391 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Introduction
+In this blog, I want to give an example of Martingale strategy. For the definition of Martingale strategy, see it on github webpage.^[https://github.com/thomasgstewart/data-science-5620-Fall-2020/blob/master/deliverables/01-roulette.md] I will use computer simulation to illustrate the operating characteristics of the above strategy.
+
+
+## Background
+
+Roulette is a game of chance in which a pocket is randomly selected. Gamblers may wager on several aspects of the outcome. For example, one may place a wager that the randomly selected pocket will be red or odd numbered or will be a specific number.
+
+there are 38 pockets of which 2 are green, 18 are red, and 18 are black. The payout for a bet on black (or red) is $1 for each $1 wagered. This means that if a gambler bets $1 on black and the randomly selected pocket is black, then the gambler will get the original $1 wager and an additional $1 as winnings.
+
+
+# A single play of the Martingale strategy
+
+Takes a state list, spins the roulette wheel, returns the state list with updated values (for example, budget, plays, etc)  
+
+ state A list with the following entries:   
+ * **B**              number, the budget  
+ * **W**              number, the budget threshold for successfully stoping  
+ * **L**              number, the maximum number of plays   
+ * **M**             number, the casino wager limit  
+ * **plays**          integer, the number of plays executed  
+ * **previous_wager** number, the wager in the previous play (0 at first play)  
+ * **previous_win**   TRUE/FALSE, indicator if the previous play was a win (TRUE at first play)  
+ 
+
+```{r}
+library(dplyr)
+one_play <- function(state){
+  
+    # Wager
+    proposed_wager <- ifelse(state$previous_win, 1, 2*state$previous_wager)
+    wager <- min(proposed_wager, state$M, state$B)
+    
+    # Spin of the wheel
+    red <- rbinom(1,1,18/38)
+    
+    # Update state
+    state$plays <- state$plays + 1
+    state$previous_wager <- wager
+    if(red){
+      # WIN
+      state$B <- state$B + wager
+      state$previous_win <- TRUE
+    }else{
+      # LOSE
+      state$B <- state$B - wager
+      state$previous_win <- FALSE
+    }
+  state
+}
+
+```
+In this section, we define a function and use several parameters, such as Wager, Spin of the wheel, Update state. In the upstate state, there are two situations: WIN or LOSE. In the wager part, we use 1 dollar if we win the lastr round, otherwise the wager is twice the money we lost last time. In the spin of the model, we use Binomial Distribution to build a situation in roulette, which there  are 38 blocks, we have 18/38 chance to win. The plays count automatically for each spin of the wheel. We define we win when the output is red. For the beginning, the wager we use is 1.
+
+
+
+## Stopping rule
+
+Takes the state list and determines if the gambler has to stop
+
+```{r}
+stop_play <- function(state){
+  if(state$B <= 0) return(TRUE)
+  if(state$plays >= state$L) return(TRUE)
+  if(state$B >= state$W) return(TRUE)
+  FALSE
+}
+```
+
+The above mentioned three cases of stopping the game. The first is that the starting budget is 0 or less than 0, we can say we lose what we have. The second situation is that the number of times of play has reached the topline level. In actual situations, the bookmaker may limit the number of bets to avoid risks. The third situation is that we reach the prize what we want. Of cource, in real situation, when a gambler win some money, the gambler would continue to gamble.
+In this part,we set 3 parameters,B, which stands starting budget, plays, which stands time threshold for stopping and W, which stands winnings threshold for stopping.
+ 
+
+## Play roulette to either bankruptcy, success, or play limits
+
+* **B**              number, the budget  
+ * **W**              number, the budget threshold for successfully stoping  
+ * **L**              number, the maximum number of plays   
+ * **M**             number, the casino wager limit  
+A vector of budget values calculated after each play.
+```{r}
+one_series <- function(
+    B = 200
+  , W = 300
+  , L = 1000
+  , M = 100
+){
+
+  # initial state
+  state <- list(
+    B = B
+  , W = W
+  , L = L
+  , M = M
+  , plays = 0
+  , previous_wager = 0
+  , previous_win = TRUE
+  )
+  
+  # vector to store budget over series of plays
+  budget <- rep(NA, L)
+  
+  # For loop of plays
+  for(i in 1:L){
+    new_state <- state %>% one_play
+    budget[i] <- new_state$B
+    if(new_state %>% stop_play){
+      plot(budget-200, xlab = "Time of Play", ylab = "Earnings")
+      return(budget[1:i])
+    }
+    state <- new_state
+  }
+  budget    
+}
+```
+
+In this section, we create a function called one_series using 4 parameters, which are B, W, L, M. Then we difine the initial state and give numbers to plays, previous_wager and previous_win. In other words the starting wager is 1 because the default is we win from the #0. 
+The second part, we have a vector to store the budgets after each play.
+As for the loop from the function, the number of loops playing is about when we stop the play, so the max is L and will stop when we stop playing. We define new_state from one_play function using state as a parameter. then we refresh the budget. We stop when our status meets stop_play status, otherwise we continue the loop.
+
+
+# helper function
+
+```{r}
+get_last <- function(x) x[length(x)] 
+```
+
+In this section, we define a function called get_last, which get the last number from a vector. For example, a vector has 100 elements with 1, 2 ,……, 100, get_last function use 100 as the output.
+
+# Simulation
+```{r}
+walk_out_money <- rep(NA, 1500)
+for(j in seq_along(walk_out_money)){
+  walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
+}
+```
+
+![](/Users/clevo570/Downloads/000079.png)
+
+In this part, we do a simulation using 1500 times. We count the walk_out_money by using the get_last function onto one_series(B = 200, W = 300, L = 1000, M = 100). It calculate the money we have when we end the play.
+
+
+
+
+# Walk out money distribution
+
+```{r}
+hist(walk_out_money, breaks = 100)
+```
+In this part, it generate a graph showing the walk-out-money. From the graph, all of the money is 0 or 300, which means, we cannot reach the max number of plays, we will quit the game either lose everything or reach our hoal, and the chance is near half half. the chance we we is littlr higher. In the next part, we calculate the possibilities.
+
+
+# Estimated probability of walking out with extra cash
+```{r}
+mean(walk_out_money > 200)
+```
+
+In this part, we calculate the possibilities of we walk-out with money more than 200, which shows 0.526.
+
+
+# Estimated earnings
+```{r}
+mean(walk_out_money - 200)
+```
+
+In this part, we calculate the expected winning and it is -44.4444, which means if I use the strategy, we all going to lose 44.44 as an expected value.
+
+
+# Average number of plays
+```{r}
+length(one_series(B = 200, W = 300, L = 1000, M = 100))
+```
+In this part, we calculate the average number of plays. From the chart above, we can obviously conclude we nearly never reach the max number of plays. So what's the average? it show 248 far less than 1000.
+
+Next, we are going to explore more situations by changing patameters.
+
+#Change W to 400
+The simulation above use W=300. We know change it into 400 because when we lose, we lose 200, so I want to know what will hapen if we quit by winning 200.
+```{r}
+one_series <- function(
+    B = 200
+  , W = 400
+  , L = 1000
+  , M = 100
+){
+
+  # initial state
+  state <- list(
+    B = B
+  , W = W
+  , L = L
+  , M = M
+  , plays = 0
+  , previous_wager = 0
+  , previous_win = TRUE
+  )
+  
+  # vector to store budget over series of plays
+  budget <- rep(NA, L)
+  
+  # For loop of plays
+  for(i in 1:L){
+    new_state <- state %>% one_play
+    budget[i] <- new_state$B
+    if(new_state %>% stop_play){
+      return(budget[1:i])
+    }
+    state <- new_state
+  }
+  budget    
+}
+
+```
+
+```{r}
+get_last <- function(x) x[length(x)] 
+```
+
+```{r}
+walk_out_money <- rep(NA, 1500)
+for(j in seq_along(walk_out_money)){
+  walk_out_money[j] <- one_series(B = 200, W = 400, L = 1000, M = 100) %>% get_last
+}
+```
+
+```{r}
+hist(walk_out_money, breaks = 100)
+```
+
+```{r}
+mean(walk_out_money > 200)
+```
+
+```{r}
+mean(walk_out_money - 200)
+```
+
+```{r}
+length(one_series(B = 200, W = 400, L = 1000, M = 100))
+```
+ Now we loose the limited of winning, which is we would quit when we earn 200 dollars. In this situation, we are greedy and want to earn more, but the reality is that we have lower chance (about 30%) to win out. For most time, we lose to 0. As for the mean earning, it is -83.06067 this time. It also revealed. Under this strategy, the more greedy the easier it is to lose
+ 
+ 
+#Change L to 200
+The simulation above use L=1000 but the average number of plays is just 248 making this parameter very loose to affect the final result. Now we change it to 200
+```{r}
+one_series <- function(
+    B = 200
+  , W = 300
+  , L = 200
+  , M = 100
+){
+
+  # initial state
+  state <- list(
+    B = B
+  , W = W
+  , L = L
+  , M = M
+  , plays = 0
+  , previous_wager = 0
+  , previous_win = TRUE
+  )
+  
+  # vector to store budget over series of plays
+  budget <- rep(NA, L)
+  
+  # For loop of plays
+  for(i in 1:L){
+    new_state <- state %>% one_play
+    budget[i] <- new_state$B
+    if(new_state %>% stop_play){
+      return(budget[1:i])
+    }
+    state <- new_state
+  }
+  budget    
+}
+
+```
+
+```{r}
+get_last <- function(x) x[length(x)] 
+```
+
+```{r}
+walk_out_money <- rep(NA, 1500)
+for(j in seq_along(walk_out_money)){
+  walk_out_money[j] <- one_series(B = 200, W = 300, L = 200, M = 100) %>% get_last
+}
+```
+
+```{r}
+hist(walk_out_money, breaks = 100)
+``` 
+
+```{r}
+mean(walk_out_money > 200)
+```
+
+```{r}
+mean(walk_out_money - 200)
+```
+
+```{r}
+length(one_series(B = 200, W = 300, L = 200, M = 100))
+```
+
+In this case, we shorten the maximum number of games. From the graph, it seems that the probability of 0 on the left side has not decreased, and the right side has become a step up. Comparing the default situation, the possibility and the mean do not change apparently. It shows the number of plays does not affect the chance too much. When number of plays goes up, the distribution of numbers will be more to both sides.
+
+
+#Change M to 300
+The simulation above use M=100, now we put it as 300, which means it does not have the limit on wager.
+```{r}
+one_series <- function(
+    B = 200
+  , W = 300
+  , L = 1000
+  , M = 300
+){
+
+  # initial state
+  state <- list(
+    B = B
+  , W = W
+  , L = L
+  , M = M
+  , plays = 0
+  , previous_wager = 0
+  , previous_win = TRUE
+  )
+  
+  # vector to store budget over series of plays
+  budget <- rep(NA, L)
+  
+  # For loop of plays
+  for(i in 1:L){
+    new_state <- state %>% one_play
+    budget[i] <- new_state$B
+    if(new_state %>% stop_play){
+      return(budget[1:i])
+    }
+    state <- new_state
+  }
+  budget    
+}
+
+```
+
+```{r}
+get_last <- function(x) x[length(x)] 
+```
+
+```{r}
+walk_out_money <- rep(NA, 1500)
+for(j in seq_along(walk_out_money)){
+  walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 300) %>% get_last
+}
+```
+
+```{r}
+hist(walk_out_money, breaks = 100)
+``` 
+
+```{r}
+mean(walk_out_money > 200)
+```
+
+```{r}
+mean(walk_out_money - 200)
+```
+
+```{r}
+length(one_series(B = 200, W = 300, L = 1000, M = 300))
+```
+
+Now, it shows with the no limit on wager, the expected wining chance and the average earning do not change much, rhe histogram also looks similar as the first situation. Only in the last part, which is the average times of play change much because when we lose in a row, we have more chance to lose everything by putting a bigger wager. However, it does not happen too much because 100 is a huge number, if we reach this level,we need to lose 7 times in a row, which is not a high probability event.
+
+# limitations of the simulation
+The limitation of this model is that we generally don't play games like this. Again, this is just an exhaustive example in one situation. Most people would not use this strategy, but he did analyze its effectiveness. As for simplifications or other sources of uncertainty, it simplified the rules of the casino and turned human emotions into machines. Similarly, people’s expectations will change as gambling changes. Also, there is a default that the casino uses fair props.
+
+# Conclusions
+
+In this model, we simulated Martingale strategy with a computer. In this strategy, there are four parameters we can adjust, the budget, the budget threshold for successfully stoping, the maximum number of plays and the casino wager limit. We changed different parameters to test the impact of different parameters on the final result. By default, our probability of winning is more than 50%, but we expect earning is negative. The reason for this is that when we win money, we can only win one dollar, but we lose a lot. Other parameters mainly affect the trend of the model, but have little effect on the probability. In other words, it build some limitation. When we put the winning money higher, we have more chance to lose everything. That is what happened in gambling, Gamblers are greedy, they want to win, but they lose all in the end
