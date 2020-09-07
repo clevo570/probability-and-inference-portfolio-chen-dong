@@ -5,7 +5,7 @@ output: html_notebook
 
 
 ```{r}
-require(magrittr)
+require(magrittr) 
 ```
 
 
