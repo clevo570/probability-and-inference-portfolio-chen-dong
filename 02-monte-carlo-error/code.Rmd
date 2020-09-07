@@ -1,0 +1,138 @@
+---
+title: "02-monte-carlo-error-Simulation"
+output: html_notebook
+---
+
+
+```{r}
+require(magrittr)
+```
+
+
+#Abosolute Error
+```{r}
+#Prob
+p <- c(0.01, 0.05, 0.10, 0.25, 0.50)
+#Replicates
+R_log <- 2:15
+
+
+abs_error <- rep(NA,1000)
+p_abs_error <- rep(NA, 14)
+
+abs_error_df <- data.frame("Exponential" = R_log)
+
+for(i in 1:5){
+  p1 = p [i]
+  for(j in 1:14){
+    R = 2^R_log[j]
+    for(k in seq_along(abs_error)){
+      p_hat <- rbinom(1, R, p1)/R
+      abs_error[k] <- abs(p1 - p_hat)
+    }
+    p_abs_error[j] = mean(abs_error)
+  }
+  abs_error_df <- cbind(abs_error_df, p = p_abs_error)
+}
+colnames(abs_error_df) <- c("Exponential", "p1", "p2", "p3", "p4", "p5")
+head(abs_error_df)
+
+```
+
+
+
+#Plot Abosolute Error
+```{r}
+library(ggplot2)
+library(scales)
+ggplot(abs_error_df, aes(x = Exponential))+
+  geom_line(aes(y = p1), colour = "red")+
+  geom_line(aes(y = p2), colour = "green")+
+  geom_line(aes(y = p3), colour = "blue")+
+  geom_line(aes(y = p4), colour = "black")+
+  geom_line(aes(y = p5), colour = "orange")+
+  
+  geom_point(aes(y = p1), colour = "red")+
+  geom_point(aes(y = p2), colour = "green")+
+  geom_point(aes(y = p3), colour = "blue")+
+  geom_point(aes(y = p4), colour = "black")+
+  geom_point(aes(y = p5), colour = "orange")+
+  
+  annotate('text', x=13, y=0.075, label='p=0.01 red')+
+  annotate('text', x=13, y=0.1, label='p=0.05 green')+
+  annotate('text', x=13, y=0.125, label='p=0.10 blue')+
+  annotate('text', x=13, y=0.15, label='p=0.25 black')+
+  annotate('text', x=13, y=0.175, label='p=0.50 orange')+
+  
+  theme_bw()+
+  
+  scale_x_continuous(name="N (log2 version)", 1:15,limits=c(1, 15)) +
+ 
+  ylab("Absolute Error")
+```
+
+
+
+#Relative Error
+```{r}
+p <- c(0.01, 0.05, 0.10, 0.25, 0.50)
+R_log <- 2:15
+
+
+rel_error <- rep(NA,1000)
+p_rel_error <- rep(NA, 14)
+
+rel_error_df <- data.frame("Exponential" = R_log)
+
+for(i in 1:5){
+  p1 = p [i]
+  for(j in 1:14){
+    R = 2^R_log[j]
+    for(k in seq_along(rel_error)){
+      p_hat <- rbinom(1, R, p1)/R
+      rel_error[k] <- abs(p1 - p_hat)/p1
+    }
+    p_rel_error[j] = mean(rel_error)
+  }
+  rel_error_df <- cbind(rel_error_df, p = p_rel_error)
+}
+colnames(rel_error_df) <- c("Exponential", "p1", "p2", "p3", "p4", "p5")
+head(rel_error_df)
+
+```
+
+
+
+#Plot Relative Error
+```{r}
+library(ggplot2)
+library(scales)
+ggplot(rel_error_df, aes(x = Exponential))+
+  geom_line(aes(y = p1), colour = "red")+
+  geom_line(aes(y = p2), colour = "green")+
+  geom_line(aes(y = p3), colour = "blue")+
+  geom_line(aes(y = p4), colour = "black")+
+  geom_line(aes(y = p5), colour = "orange")+
+  
+  geom_point(aes(y = p1), colour = "red")+
+  geom_point(aes(y = p2), colour = "green")+
+  geom_point(aes(y = p3), colour = "blue")+
+  geom_point(aes(y = p4), colour = "black")+
+  geom_point(aes(y = p5), colour = "orange")+
+  
+  annotate('text', x=13, y=0.75, label='p=0.01 red')+
+  annotate('text', x=13, y=1, label='p=0.05 green')+
+  annotate('text', x=13, y=1.25, label='p=0.10 blue')+
+  annotate('text', x=13, y=1.5, label='p=0.25 black')+
+  annotate('text', x=13, y=1.75, label='p=0.50 orange')+
+  
+  theme_bw()+
+  
+  scale_x_continuous(name="N (log2 version)", 1:15,limits=c(1, 15)) +
+ 
+  ylab("Relative Error")
+```
+
+
+
+

@@ -1,0 +1,185 @@
+---
+title: "02-monte-carlo-error-Interpret"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+# Introduction
+In this blog, I want to give an example of error simulation. For the assignment requirement, see it on github webpage.^[https://github.com/thomasgstewart/data-science-5620-fall-2020/blob/master/deliverables/02-monte-carlo-error.md] I will use computer simulation to illustrate difference between absolute error and relative error with different probability.
+
+## Background
+Simulations, which help us to estimate the probablity of each question. As the number of simulation increases, we obtain different result. Sometimes, it is difficult for us to calculate the probability through mathematical methods. At this time, by repeating many times, we can get an approximate probability. **Monte Carlo Method** focuses on constantly repeating random samples to achieve certain results. Thus, the error using Monte Carlo Method is called **Monte Carlo Error**.
+
+ * **p̂** stands for the probability estimated from simulation.
+ * **p** stands for the true theoretical probability.
+There are two types of error:
+ * **Absolute error** = |p̂−p|stands for the magnitude of the difference between the exact value and the approximation.
+ * **Relative error** = |p̂−p|/p  stands for absolute error divided by the exact value. 
+
+# Simulate the Absolute Error
+
+We use Bernoulli experiment to simulate the difference between experimental data and theoretical data.
+
+Besides the term I mentioned before. state A list with the following entries:   
+ * **R**              number, the number we replicate in the experiment  
+ * **R_log**          number, logarithm of R 
+
+For each experiment, we repeat 1000 times.
+
+```{r}
+#Prob
+p <- c(0.01, 0.05, 0.10, 0.25, 0.50)
+#Replicates
+R_log <- 2:15
+
+
+abs_error <- rep(NA,1000)
+p_abs_error <- rep(NA, 14)
+
+abs_error_df <- data.frame("Exponential" = R_log)
+
+for(i in 1:5){
+  p1 = p [i]
+  for(j in 1:14){
+    R = 2^R_log[j]
+    for(k in seq_along(abs_error)){
+      p_hat <- rbinom(1, R, p1)/R
+      abs_error[k] <- abs(p1 - p_hat)
+    }
+    p_abs_error[j] = mean(abs_error)
+  }
+  abs_error_df <- cbind(abs_error_df, p = p_abs_error)
+}
+colnames(abs_error_df) <- c("Exponential", "p1", "p2", "p3", "p4", "p5")
+head(abs_error_df)
+
+```
+In this simulation, we do a loop. We assume probablity is 0.01, 0.05, 0.10, 0.25, 0.50 in a row and replicates number is from 2^2 to 2^15. Different experiment runs separately. For each simulation, we calculate the error for each time and calculate the mean error as the output. Finally, we put it into a dataframe.
+
+#Plot Abosolute Error
+```{r}
+library(ggplot2)
+library(scales)
+ggplot(abs_error_df, aes(x = Exponential))+
+  geom_line(aes(y = p1), colour = "red")+
+  geom_line(aes(y = p2), colour = "green")+
+  geom_line(aes(y = p3), colour = "blue")+
+  geom_line(aes(y = p4), colour = "black")+
+  geom_line(aes(y = p5), colour = "orange")+
+  
+  geom_point(aes(y = p1), colour = "red")+
+  geom_point(aes(y = p2), colour = "green")+
+  geom_point(aes(y = p3), colour = "blue")+
+  geom_point(aes(y = p4), colour = "black")+
+  geom_point(aes(y = p5), colour = "orange")+
+  
+  annotate('text', x=13, y=0.075, label='p=0.01 red')+
+  annotate('text', x=13, y=0.1, label='p=0.05 green')+
+  annotate('text', x=13, y=0.125, label='p=0.10 blue')+
+  annotate('text', x=13, y=0.15, label='p=0.25 black')+
+  annotate('text', x=13, y=0.175, label='p=0.50 orange')+
+  
+  theme_bw()+
+  
+  scale_x_continuous(name="N (log2 version)", 1:15,limits=c(1, 15)) +
+ 
+  ylab("Absolute Error")
+```
+In this picture, the y axis represents the absolute error. The x axis represents the logarithm of the number of experiments under 2. For example, if the x axis shows 3,the  number of experiment is 2^3 which is 8. Thus, the max number of we experiment is 2^15 = 32 768.
+
+From the picture, there is a clear trend. As the number of experiments increases, the absolute error value decreases. Although we only conducted 5 probability experiments, we can draw conclusions that as the theoretical probability p decreases, the absolute error value decreases under the same number of experiments.
+
+When we choose p = 0.5 and only take 4 times of experiment, we absolute error is near 0.2. However when we take 32768 times of experiment, it decreace near 0. 
+
+From the graph, we can conclude that at any probability, when the experiment is repeated enough times, the absolute error will tend to zero. In this picture, regardless of the probability, when the number of experiments is close to between 2^12 and 2^13, there is almost no difference in error. Of course, when the number of repetitions is not large enough, the absolute error is still very large.
+
+
+
+# Simulate the Relative Error
+Next, we have to calculate the relative error. The definition of relative error is absolute error divided by probability. Because when p=0.01, the absolute error must be small, but the relative error is not necessarily smaller than when p=0.5. We have to simulate through experiments.
+
+```{r}
+p <- c(0.01, 0.05, 0.10, 0.25, 0.50)
+R_log <- 2:15
+
+
+rel_error <- rep(NA,1000)
+p_rel_error <- rep(NA, 14)
+
+rel_error_df <- data.frame("Exponential" = R_log)
+
+for(i in 1:5){
+  p1 = p [i]
+  for(j in 1:14){
+    R = 2^R_log[j]
+    for(k in seq_along(rel_error)){
+      p_hat <- rbinom(1, R, p1)/R
+      rel_error[k] <- abs(p1 - p_hat)/p1
+    }
+    p_rel_error[j] = mean(rel_error)
+  }
+  rel_error_df <- cbind(rel_error_df, p = p_rel_error)
+}
+colnames(rel_error_df) <- c("Exponential", "p1", "p2", "p3", "p4", "p5")
+head(rel_error_df)
+
+```
+In this simulation, we do a loop. We assume probablity is 0.01, 0.05, 0.10, 0.25, 0.50 in a row and replicates number is from 2^2 to 2^15. Different experiment runs separately. For each simulation, we calculate the error/prob for each time and calculate the mean relative error as the output. Finally, we put it into a dataframe.
+
+
+#Plot Relative Error
+```{r}
+library(ggplot2)
+library(scales)
+ggplot(rel_error_df, aes(x = Exponential))+
+  geom_line(aes(y = p1), colour = "red")+
+  geom_line(aes(y = p2), colour = "green")+
+  geom_line(aes(y = p3), colour = "blue")+
+  geom_line(aes(y = p4), colour = "black")+
+  geom_line(aes(y = p5), colour = "orange")+
+  
+  geom_point(aes(y = p1), colour = "red")+
+  geom_point(aes(y = p2), colour = "green")+
+  geom_point(aes(y = p3), colour = "blue")+
+  geom_point(aes(y = p4), colour = "black")+
+  geom_point(aes(y = p5), colour = "orange")+
+  
+  annotate('text', x=13, y=0.75, label='p=0.01 red')+
+  annotate('text', x=13, y=1, label='p=0.05 green')+
+  annotate('text', x=13, y=1.25, label='p=0.10 blue')+
+  annotate('text', x=13, y=1.5, label='p=0.25 black')+
+  annotate('text', x=13, y=1.75, label='p=0.50 orange')+
+  
+  theme_bw()+
+  
+  scale_x_continuous(name="N (log2 version)", 1:15,limits=c(1, 15)) +
+ 
+  ylab("Relative Error")
+```
+In this picture, the y axis represents the relative error. The x axis represents the logarithm of the number of experiments under 2. For example, if the x axis shows 3,the  number of experiment is 2^3 which is 8. Thus, the max number of we experiment is 2^15 = 32 768.
+
+From the picture, there is a clear trend. As the number of experiments increases, the relative error value decreases. Although we only conducted 5 probability experiments, we can draw conclusions that as the theoretical probability p decreases, the relative error value increaces under the same number of experiments.
+
+When we choose p = 0.01 and only take 4 times of experiment, we relative error is above 2.0. Although it's absolute error is just about 0.02, it's still a "bad" data. However when we take 32768 times of experiment, it decreace near 0. 
+
+From the graph, we can conclude that at any probability, when the experiment is repeated enough times, the relative = error will tend to zero. In this picture, regardless of the probability, when the number of experiments is close to between 2^13 and 2^14, there is almost no difference in error. Of course, when the number of repetitions is not large enough, the relative error is still very large. Others, the red line from the graph seems to be hard to become near zero. It shows, although we use many times to simulate small possibility events, we stil hard to eliminate errors. For example, the probability of something is one in a million. We simulated one million times and appeared twice, the relative error is 100%.
+
+The biggest difference from the above figure is: as the probability increases, the absolute error increases, and the relative probability decreases.
+
+
+![](/Users/clevo570/Downloads/rel_er.png)
+
+Another interesting thing. In one of my simulations, the red line was larger than 2 when the number on the x-axis was 3. This is what I said above. When the probability is too small, the occurrence of a small probability event will have a great impact.
+
+# limitations of the simulation
+Most of the time, we don't seem to have so many opportunities to repeat the experiment. When we want to simulate to almost no absolute error, we have to simulate at least nearly 10,000 times. This will cause a lot of cost and waste.
+
+It is difficult for us to simulate without systematic errors. For example, we assume that the probability of a coin is 50%, but because of the difference in density, it cannot be 50% in actual situations. Suppose we simulate 1 million times, the ideal theoretical data is 500,000: 500,000, but the actual theoretical data may be 500,500: 499,500. This can also cause trouble.
+
+It seems very hard to find a way to reduce error when the number of experiment is small.
+
+
+
