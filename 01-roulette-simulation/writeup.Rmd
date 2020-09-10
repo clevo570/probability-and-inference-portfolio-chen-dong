@@ -1,8 +1,6 @@
 ---
 title: "R Notebook"
-output:
-  html_document:
-    df_print: paged
+output: html_notebook
 ---
 
 # Introduction
@@ -30,7 +28,7 @@ Takes a state list, spins the roulette wheel, returns the state list with update
  * **previous_win**   TRUE/FALSE, indicator if the previous play was a win (TRUE at first play)  
  
 
-```{r}
+```{r, eval = FALSE}
 library(dplyr)
 one_play <- function(state){
   
@@ -65,7 +63,7 @@ In this section, we define a function and use several parameters, such as Wager,
 
 Takes the state list and determines if the gambler has to stop
 
-```{r}
+```{r, eval = FALSE}
 stop_play <- function(state){
   if(state$B <= 0) return(TRUE)
   if(state$plays >= state$L) return(TRUE)
@@ -85,7 +83,7 @@ In this part,we set 3 parameters,B, which stands starting budget, plays, which s
  * **L**              number, the maximum number of plays   
  * **M**             number, the casino wager limit  
 A vector of budget values calculated after each play.
-```{r}
+```{r, eval = FALSE}
 one_series <- function(
     B = 200
   , W = 300
@@ -128,18 +126,19 @@ As for the loop from the function, the number of loops playing is about when we 
 
 # helper function
 
-```{r}
+```{r, eval = FALSE}
 get_last <- function(x) x[length(x)] 
 ```
 
 In this section, we define a function called get_last, which get the last number from a vector. For example, a vector has 100 elements with 1, 2 ,……, 100, get_last function use 100 as the output.
 
 # Simulation
-```{r}
+```{r,eval = FALSE}
 walk_out_money <- rep(NA, 1500)
 for(j in seq_along(walk_out_money)){
   walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 100) %>% get_last
 }
+
 ```
 
 In this part, we do a simulation using 1500 times. We count the walk_out_money by using the get_last function onto one_series(B = 200, W = 300, L = 1000, M = 100). It calculate the money we have when we end the play.
@@ -167,7 +166,7 @@ In this part, it generate a graph showing the walk-out-money. From the graph, al
 mean(walk_out_money > 200)
 ```
 
-In this part, we calculate the possibilities of we walk-out with money more than 200, which shows 0.526.
+In this part, we calculate the possibilities of we walk-out with money more than 200, which shows 0.5147.
 
 
 # Estimated earnings
@@ -175,14 +174,14 @@ In this part, we calculate the possibilities of we walk-out with money more than
 mean(walk_out_money - 200)
 ```
 
-In this part, we calculate the expected winning and it is -44.4444, which means if I use the strategy, we all going to lose 44.44 as an expected value. **ADD** Althogh we have over 50% chance to win, we still have a expected value to lose money. That is we only have two choice: win 100 or lose 200. It is so easy to lose more money than win by the strategy.
+In this part, we calculate the expected winning and it is -45.48, which means if I use the strategy, we all going to lose 45.48 as an expected value. **ADD** Althogh we have over 50% chance to win, we still have a expected value to lose money. That is we only have two choice: win 100 or lose 200. It is so easy to lose more money than win by the strategy.
 
 
 # Average number of plays
 ```{r}
 length(one_series(B = 200, W = 300, L = 1000, M = 100))
 ```
-In this part, we calculate the average number of plays. From the chart above, we can obviously conclude we nearly never reach the max number of plays. So what's the average? it show 248 far less than 1000.
+In this part, we calculate the average number of plays. From the chart above, we can obviously conclude we nearly never reach the max number of plays. So what's the average? it show 252 far less than 1000.
 
 Next, we are going to explore more situations by changing patameters.
 
@@ -228,7 +227,7 @@ one_series <- function(
 get_last <- function(x) x[length(x)] 
 ```
 
-```{r}
+```{r,eval = FALSE}
 walk_out_money <- rep(NA, 1500)
 for(j in seq_along(walk_out_money)){
   walk_out_money[j] <- one_series(B = 200, W = 400, L = 1000, M = 100) %>% get_last
@@ -238,25 +237,25 @@ for(j in seq_along(walk_out_money)){
 ```{r}
 hist(walk_out_money, breaks = 100)
 ```
-**ADD**In this part, it generate a graph showing the walk-out-money. From the graph, all of the money is 0 or 400, which means, we cannot reach the max number of plays, we will quit the game either lose everything or reach our hoal, and the chance is about 70%-30%. Comparing the situation before, which is half half, this time we have less chance to quit while we win.
+**ADD**In this part, it generate a graph showing the walk-out-money. From the graph, all of the money is 0 or 400, which means, we cannot reach the max number of plays, we will quit the game either lose everything or reach our goal, and the chance is about 70%-30%. Comparing the situation before, which is half half, this time we have less chance to quit while we win.
 
 
 ```{r}
 mean(walk_out_money > 200)
 ```
-**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 400, L = 1000, M = 100 is 29.67%. This probability is much lower than before which means we are less likely to be profitable in this scenario comparing with W=300.
+**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 400, L = 1000, M = 100 is 30.13%. This probability is much lower than before which means we are less likely to be profitable in this scenario comparing with W=300.
 
 ```{r}
 mean(walk_out_money - 200)
 ```
-**ADD**In this part, we calculate the expected winning and it is -83.06, which means double as W = 300. Althogh we have 30% chance to win 200 dollars, we still have 70% chance to lose all. There is not easy for us to earn from this situation.
+**ADD**In this part, we calculate the expected winning and it is -79.84, which means double as W = 300. Althogh we have 30% chance to win 200 dollars, we still have 70% chance to lose all. There is not easy for us to earn from this situation.
 
 ```{r}
 length(one_series(B = 200, W = 400, L = 1000, M = 100))
 ```
-**ADD**In this part, we calculate the average number of plays. From the chart above, we can obviously conclude we nearly never reach the max number of plays. So what's the average? it show 466 far less than 1000. However, still more than W=300. That is caused by we need a longer road to take the money out.
+**ADD**In this part, we calculate the average number of plays. From the chart above, we can obviously conclude we nearly never reach the max number of plays. So what's the average? it show 419 far less than 1000. However, still more than W=300. That is caused by we need a longer road to take the money out.
 
- Now we loose the limited of winning, which is we would quit when we earn 200 dollars. In this situation, we are greedy and want to earn more, but the reality is that we have lower chance (about 30%) to win out. For most time, we lose to 0. As for the mean earning, it is -83.06067 this time. It also revealed. Under this strategy, the more greedy the easier it is to lose
+ Now we loose the limited of winning, which is we would quit when we earn 200 dollars. In this situation, we are greedy and want to earn more, but the reality is that we have lower chance (about 30%) to win out. For most time, we lose to 0. As for the mean earning, it is -79.84 this time. It also revealed. Under this strategy, the more greedy the easier it is to lose
  
  
 #Change L to 200
@@ -301,7 +300,7 @@ one_series <- function(
 get_last <- function(x) x[length(x)] 
 ```
 
-```{r}
+```{r,eval = FALSE}
 walk_out_money <- rep(NA, 1500)
 for(j in seq_along(walk_out_money)){
   walk_out_money[j] <- one_series(B = 200, W = 300, L = 200, M = 100) %>% get_last
@@ -312,24 +311,24 @@ for(j in seq_along(walk_out_money)){
 hist(walk_out_money, breaks = 100)
 ``` 
 
+**ADD**In this part, it generate a graph showing the walk-out-money. From the graph, most of the money is 0 or 200-300, which means, in most time we quit the game with 0 or win some, and the chance is about half half. Comparing the situation before, which is half half, it is quit similar, which means has near chance to win overall. (figure is 58% to 51%)
+
 ```{r}
 mean(walk_out_money > 200)
 ```
-**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 300, L = 200, M = 100 is 51.33%. This probability is much similar as before L = 1000. It means the max number of plays does not affect the chance we win too much.
+**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 300, L = 200, M = 100 is 58.27%. This probability is close as before L = 1000, but a little bit higher, which meand when we limit L,we have more chance to win. And for the expected value, we lose less.
 
 ```{r}
 mean(walk_out_money - 200)
 ```
 
-**ADD**In this part, we calculate the expected winning and it is -45, which means similar as L = 1000.  Combine the output we have 51.3% to win, L does not affect the result too much, but we will win less if we win, because when L = 1000, we can win $100, but now maybe less than 100.
+**ADD**In this part, we calculate the expected winning and it is -30.03, which larger than L = 1000.Thus, it means when we gamble much, we lose much. No gambling is earning money from expected value!
 
 ```{r}
 length(one_series(B = 200, W = 300, L = 200, M = 100))
 ```
-**ADD**When we limit the number of plays to 200, it will drop to 120. That is we cut 80% of the upper limit but only reduce 50% average number of plays. 
+**ADD**When we limit the number of plays to 200, it will drop to 118. That is we cut 80% of the upper limit but only reduce 50% average number of plays. 
 
-
-In this case, we shorten the maximum number of games. From the graph, it seems that the probability of 0 on the left side has not decreased, and the right side has become a step up. Comparing the default situation, the possibility and the mean do not change apparently. It shows the number of plays does not affect the chance too much. When number of plays goes up, the distribution of numbers will be more to both sides.
 
 
 #Change M to 300
@@ -374,7 +373,7 @@ one_series <- function(
 get_last <- function(x) x[length(x)] 
 ```
 
-```{r}
+```{r,eval = FALSE}
 walk_out_money <- rep(NA, 1500)
 for(j in seq_along(walk_out_money)){
   walk_out_money[j] <- one_series(B = 200, W = 300, L = 1000, M = 300) %>% get_last
@@ -384,25 +383,26 @@ for(j in seq_along(walk_out_money)){
 ```{r}
 hist(walk_out_money, breaks = 100)
 ``` 
+**ADD**In this part, it generate a graph showing the walk-out-money. From the graph, all of the money is 0 or 300, all looks similar to M=100. M=100 or M=300 don't affect too much because it's very hard to get wager =100 situation or we lose 7 times in a row. Thus, the graph does not change too much.
 
 ```{r}
 mean(walk_out_money > 200)
 ```
-**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 300, L = 1000, M = 300 is 52.8%%. This probability is similar as before M = 100. It shows the Wager does not limit too much. We can speculate that when we reach the wager to 100, it is far from we lose all.
+**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 300, L = 1000, M = 300 is 52.4%. This probability is similar as before M = 100. It shows the Wager does not limit too much. We can speculate that when we reach the wager to 100, it is far from we lose all.
 
 
 ```{r}
 mean(walk_out_money - 200)
 ```
 
-**ADD**In this part, we calculate the expected winning and it is -41.6. To my surprice, it is a little less than M=100. I think they should look similar, and this time is caused by random error.
+**ADD**In this part, we calculate the expected winning and it is -42.8. To my surprice, it is a little less than M=100. I think they should look similar, and this time is caused by random error.
 
 ```{r}
 length(one_series(B = 200, W = 300, L = 1000, M = 300))
 ```
 
 
-**ADD**In this part, we calculate the average number of plays, which is 197. It is less than we put M = 100. That is because if we lose in a row, we may lose our money quickly because now we can lose 300 dollars for one time, but original version is just 100 dollars.
+**ADD**In this part, we calculate the average number of plays, which is 198. It is less than we put M = 100. That is because if we lose in a row, we may lose our money quickly because now we can lose 300 dollars for one time, but original version is just 100 dollars.
 
 
 Now, it shows with the no limit on wager, the expected wining chance and the average earning do not change much, rhe histogram also looks similar as the first situation. Only in the last part, which is the average times of play change much because when we lose in a row, we have more chance to lose everything by putting a bigger wager. However, it does not happen too much because 100 is a huge number, if we reach this level,we need to lose 7 times in a row, which is not a high probability event.
