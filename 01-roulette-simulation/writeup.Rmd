@@ -168,7 +168,7 @@ In this part, it generate a graph showing the walk-out-money. From the graph, al
 mean(walk_out_money > 200)
 ```
 
-In this part, we calculate the possibilities of we walk-out with money more than 200, which shows 0.506.
+In this part, we calculate the possibilities of we walk-out with money more than 200, which shows 0.504.
 
 
 # Estimated earnings
@@ -176,7 +176,7 @@ In this part, we calculate the possibilities of we walk-out with money more than
 mean(walk_out_money - 200)
 ```
 
-In this part, we calculate the expected winning and it is -48.2, which means if I use the strategy, we all going to lose 45.85 as an expected value. **ADD** Althogh we have over 50% chance to win, we still have a expected value to lose money. That is we only have two choice: win 100 or lose 200. It is so easy to lose more money than win by the strategy.
+In this part, we calculate the expected winning and it is -48.9, which means if I use the strategy, we all going to lose 45.85 as an expected value. **ADD** Althogh we have over 50% chance to win, we still have a expected value to lose money. That is we only have two choice: win 100 or lose 200. It is so easy to lose more money than win by the strategy.
 
 
 # Average number of plays
@@ -189,7 +189,7 @@ mean(number_of_plays)
 ```{r}
 length(one_series(B = 200, W = 300, L = 1000, M = 100))
 ```
-In this part, we calculate the average number of plays. From the chart above, we can obviously conclude we nearly never reach the max number of plays. So what's the average? it show 202.9 far less than 1000.
+In this part, we calculate the average number of plays. From the chart above, we can obviously conclude we nearly never reach the max number of plays. So what's the average? it show 203.77 far less than 1000.
 
 Next, we are going to explore more situations by changing patameters.
 
@@ -263,7 +263,7 @@ mean(walk_out_money - 200)
 ```{r}
 mean(number_of_plays)
 ```
-**ADD**In this part, we calculate the average number of plays. From the chart above, we can obviously conclude we nearly never reach the max number of plays. So what's the average? it shows 344.4 far less than 1000. However, still more than W=300. That is caused by we need a longer road to take the money out.
+**ADD**In this part, we calculate the average number of plays. From the chart above, we can obviously conclude we nearly never reach the max number of plays. So what's the average? it shows 344.1 far less than 1000. However, still more than W=300. That is caused by we need a longer road to take the money out.
 
 Now we loose the limited of winning, which is we would quit when we earn 200 dollars. In this situation, we are greedy and want to earn more, but the reality is that we have lower chance (about 30%) to win out. For most time, we lose to 0. As for the mean earning, it is -78.60 this time. It also revealed. Under this strategy, the more greedy the easier it is to lose
  
@@ -328,18 +328,18 @@ hist(walk_out_money, breaks = 100)
 ```{r}
 mean(walk_out_money > 200)
 ```
-**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 300, L = 200, M = 100 is 56.33%. This probability is close as before L = 1000, but a little bit higher, which meand when we limit L,we have more chance to win. And for the expected value, we lose less.
+**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 300, L = 200, M = 100 is 56.47%. This probability is close as before L = 1000, but a little bit higher, which meand when we limit L,we have more chance to win. And for the expected value, we lose less.
 
 ```{r}
 mean(walk_out_money - 200)
 ```
 
-**ADD**In this part, we calculate the expected winning and it is -35.73, which larger than L = 1000.Thus, it means when we gamble much, we lose much. No gambling is earning money from expected value!
+**ADD**In this part, we calculate the expected winning and it is -35.33, which larger than L = 1000.Thus, it means when we gamble much, we lose much. No gambling is earning money from expected value!
 
 ```{r}
 mean(number_of_plays)
 ```
-**ADD**When we limit the number of plays to 200, it will drop to 156.9. That is we cut 80% of the upper limit but only reduce 25% average number of plays. 
+**ADD**When we limit the number of plays to 200, it will drop to 156.7. That is we cut 80% of the upper limit but only reduce 25% average number of plays. 
 
 
 
@@ -402,21 +402,21 @@ hist(walk_out_money, breaks = 100)
 ```{r}
 mean(walk_out_money > 200)
 ```
-**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 300, L = 1000, M = 300 is 52.6%. This probability is similar as before M = 100. It shows the Wager does not limit too much. We can speculate that when we reach the wager to 100, it is not a regular event. 
+**ADD**The estimated probability of walking out with extra cash for the parameters B = 200, W = 300, L = 1000, M = 300 is 52.67%. This probability is similar as before M = 100. It shows the Wager does not limit too much. We can speculate that when we reach the wager to 100, it is not a regular event. 
 
 
 ```{r}
 mean(walk_out_money - 200)
 ```
 
-**ADD**In this part, we calculate the expected winning and it is -42.23. To my surprice, it is a little less than M=100. I think they should look similar, and this time is caused by random error.
+**ADD**In this part, we calculate the expected winning and it is -42.03. To my surprice, it is a little less than M=100. I think they should look similar, and this time is caused by random error.
 
 ```{r}
 mean(number_of_plays)
 ```
 
 
-**ADD**In this part, we calculate the average number of plays, which is 177.2. It is less than we put M = 100. That is because if we lose in a row, we may lose our money quickly because now we can lose 300 dollars for one time, but original version is just 100 dollars.
+**ADD**In this part, we calculate the average number of plays, which is 181.2. It is less than we put M = 100. That is because if we lose in a row, we may lose our money quickly because now we can lose 300 dollars for one time, but original version is just 100 dollars.
 
 
 Now, it shows with the no limit on wager, the expected wining chance and the average earning do not change much, rhe histogram also looks similar as the first situation. Only in the last part, which is the average times of play change much because when we lose in a row, we have more chance to lose everything by putting a bigger wager. However, it does not happen too much because 100 is a huge number, if we reach this level,we need to lose 7 times in a row, which is not a high probability event.
