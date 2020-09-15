@@ -409,7 +409,7 @@ mean(walk_out_money > 200)
 mean(walk_out_money - 200)
 ```
 
-**ADD**In this part, we calculate the expected winning and it is -42.03. To my surprice, it is a little less than M=100. I think they should look similar, and this time is caused by random error.
+**ADD**In this part, we calculate the expected winning and it is -42.03. To my surprice, it is a little less than M=100. I think they should look similar, and this time is caused by random error. 
 
 ```{r}
 mean(number_of_plays)
