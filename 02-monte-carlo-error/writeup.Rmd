@@ -1,11 +1,10 @@
 ---
 title: "02-monte-carlo-error-Interpret"
-output:
-  html_document:
-    df_print: paged
-  html_notebook: default
-  pdf_document: default 
+output: html_notebook
 ---
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
 
 # Introduction
 In this blog, I want to give an example of error simulation. For the assignment requirement, see it on github webpage.^[https://github.com/thomasgstewart/data-science-5620-fall-2020/blob/master/deliverables/02-monte-carlo-error.md] I will use computer simulation to illustrate difference between absolute error and relative error with different probability.
@@ -173,6 +172,8 @@ The biggest difference from the above figure is: as the probability increases, t
 ![](/Users/clevo570/Downloads/rel_er.png)
 
 Another interesting thing. In one of my simulations, the red line was larger than 2 when the number on the x-axis was 3. This is what I said above. When the probability is too small, the occurrence of a small probability event will have a great impact.
+
+**ADD** This picture was saved during a previous simulation. It uses the same parameters as the figure above. The reason I didn't use this chart at the time was that the relative error of 0.01 was higher at 8  than at 4. I thought it was strange and interesting at the time, so I download it. As I said in the description above, when the probability is too small, the occurrence of a small probability event will have a great impact. This leads the relative error at 8 is bigger than 4.
 
 # limitations of the simulation
 Most of the time, we don't seem to have so many opportunities to repeat the experiment. When we want to simulate to almost no absolute error, we have to simulate at least nearly 10,000 times. This will cause a lot of cost and waste.
