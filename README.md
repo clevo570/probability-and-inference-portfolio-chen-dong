@@ -6,3 +6,6 @@ https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/m
 
 02-monte-carlo-error
 https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/02-monte-carlo-error
+
+03-discrete-probability-calculations
+https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/03-discrete-probability-calculations
