@@ -1,1 +1,120 @@
+---
+title: "World Series Deliverable"
+author: 'Dong Chen'
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
 
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+# Introduction
+Let's analyze the situation of the World Series. I now use the binomial distribution and the negative binomial distribution function to calculate the probability of winning the World Series. The situation is the ideal situation used, that is, excluding the referee and home court factors. Of course, we exclude BANG BANG from Houston Astros!
+
+## Background
+
+1.Suppose that the Braves and the Yankees are teams competing in the World Series.
+2.Suppose that in any given game, the probability that the Braves win is PB and the probability that the Yankees win is PY = 1 − PB.
+
+The rule of the World Series is BO7, that is, whoever wins 4 wins first is considered to be the winner, and will not play the rest of the game. In other words, 4, 5, 6, 7 games may be played last.
+
+# Methods
+
+1.What is the probability that the Braves win the World Series given that PB = 0.55?
+```{r}
+dbinom(3,6,0.55)*0.55+dbinom(3,5,0.55)*0.55+dbinom(3,4,0.55)*0.55+dbinom(3,3,0.55)*0.55
+#Also
+pbinom(3,7,0.55,lower.tail = FALSE)
+```
+So the probability that the Braves win the World Series is 0.6082878.
+
+2.What is the probability that the Braves win the World Series given that PB = x? This will be a figure (see below) with PB on the x-axis and P(Braves win World Series) on the y-axis.
+```{r}
+x <- seq(0.01,1,by=0.01)
+pbwin <- dbinom(4,7,x)+dbinom(5,7,x)+dbinom(6,7,x)+dbinom(7,7,x)
+plot(x,pbwin,type="l",main="Probability of winning the World Series",xlab="Probability of the Braves winning a head-to-head matchup",ylab="Pr(Win World Series)")
+```
+```{r}
+x <- seq(0.5,1,by=0.01)
+pbwin <- dbinom(4,7,x)+dbinom(5,7,x)+dbinom(6,7,x)+dbinom(7,7,x)
+plot(x,pbwin,type="l",main="Probability of winning the World Series",xlab="Probability of the Braves winning a head-to-head matchup",ylab="Pr(Win World Series)")
+```
+Here is the figure that Braves win the WS. The first starts at p=0.01 and the second enlarges it that p starts from 0.5.
+As we can see, in general, it meets an S curve, which means it grows slowly first, then rapidly in the middle, finally slowly at the end. And the second meets a log curve.
+
+3.Suppose one could change the World Series to be best-of-9 or some other best-of-X series. What is the shortest series length so that P(Braves win World Series|PB = .55) ≥ 0.8
+
+```{r}
+pw=0
+nloss=3
+nwin=4
+
+while(pw < 0.8){
+  nloss=nloss+1
+  nwin=nwin+1
+  pw=pnbinom(nloss,nwin,0.55)
+}
+nloss+nwin
+```
+This time we use a loop to calculate the requirement that the shortest series length so that P(Braves win World Series|PB = .55) ≥ 0.8. pnbinom(nloss,nwin,0.55) stands P(Braves win World Series|PB = .55).
+
+4.What is the shortest series length so that P(Braves win World Series|PB = x) ≥ 0.8? This will be a figure (see below) with PB on the x-axis and series length is the y-axis.
+```{r, warning=FALSE, message=FALSE}
+pb=seq(0.51,1,by=0.01)
+total=NA
+
+for(i in seq(1:length(pb))){
+  nwin=seq(1:2000)
+  nloss=nwin-1
+  pw=pnbinom(nloss,nwin,pb[i])
+  
+  total[i]=nloss[which(pw>=0.8)]+nwin[which(pw>=0.8)]
+  
+}
+
+plot(y=total,x=pb,main="Shortest series so that  in WS given p)>=0.8",xlab="Probability of the Braves winning a head-to-head matchup",ylab="Series length", type = "l",xlim=c(0.5,1), ylim=c(0,2000))
+```
+
+The method of this question is similar to the previous one. I used the pnbinom function to ensure that the number of loss is one less than the number of win. I put the number of win in a sequence of 1 to 2000. Then, we calculate the total number of games that meets P(Braves win World Series|PB = x) ≥ 0.8.
+From the figure, as PB,which is probability of the Braves winning a head-to-head matchup, increases the number of WS needs drops rapidly. When PB>=0.6, the rate of decline tends to be slow. If PB=0.7, I change 0.55 in Q3, it shows there only needs 5 games that to ensure P(Braves win World Series|PB = 0.7) ≥ 0.8.
+
+
+5.Calculate P(PB = 0.55|Braves win World Series in 7 games) under the assumption that either PB = 0.55 or PB = 0.45. Explain your solution.
+![](/Users/clevo570/Downloads/bayes.png)
+We can use Bayed Rule to  solve this question.We assume PB = 0.55 is event A, Braves win World Series in 7 games is event B. We want to calculate P(A|B), so we need to know P(B|A), which is p1 and P(B|┐A), which is p2 below. P(A)=P(B)=0.5. Thus we can calculate the answer.
+
+
+I am a little confused. So I have two versions. The first one is Braves win in exact 7 games.
+```{r}
+p1 <- dnbinom(3, 4, 0.55)
+p2 <- dnbinom(3, 4, 0.45)
+
+p <- 0.5 * p1 / (0.5 * p1 + 0.5 *p2)
+p
+```
+P(PB = 0.55|Braves win World Series in 7 games) is 0.55, which is shown above.(exact 7 games)
+
+The second one is Braves win in 7 or less games.
+```{r}
+p1 <- pbinom(3,7,0.55,lower.tail = FALSE)
+p2 <- pbinom(3,7,0.45,lower.tail = FALSE)
+
+p <- 0.5 * p1 / (0.5 * p1 + 0.5 *p2)
+p
+```
+P(PB = 0.55|Braves win World Series in 7 games) is 0.6082878, which is shown above.(7 or less games)
+
+# Conclusions
+In this simulation, we assume that PB is a constant number. But in actual baseball, especially in the World Series, it is not close to reality. Every team is striving for home advantage, because the home fiels increases the probability of winning. At the same time, the referee sometimes affects the game. Of course, some teams will cheat to gain an advantage (Houston Astros, it's you). 
+Another limitation is that PB is difficult to obtain or to verify accuracy. Actually, Yankees met Braves in ws several times. In 1996, Braves had Greg Maddux ,John Smoltzand Tom Glavine, who are 3 hof players, but they lost to Yankees 2-4. During that time, I believe PB is more than 0.55.
+All in all, we used the binomial distribution, negative binomial distribution and their functions to calculate or simulate the probability. It's interesting and very important in statistics.
