@@ -1,1 +1,172 @@
+---
+title: "Home Field Advantage Deliverable"
+author: 'Dong Chen'
+date: "09-28"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
 
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+# Introduction
+Let's analyze the situation of the World Series. The home field advantage is the edge which a team may have when playing a game at its home stadium. For example, it is the edge the Braves may have over the Yankees when the head-to-head match-up is in Atlanta. It is the advantage the Yankees may have when the head-to-head match-up is in New York.
+
+## Background
+
+The World Series is a first-to-4-wins match-up between the champions of the American and National Leagues of Major League Baseball. In this assignment, I am going to use simulation and analytic methods to compare the probability of winning the World Series with and without home field advantage.
+
+1.Suppose that the Braves and the Yankees are teams competing in the World Series.
+2.Suppose that in any given game, the probability that the Braves win is PB and the probability that the Yankees win is PY = 1 − PB.
+3.The table below has the two possible schedules for each game of the series. (NYC = New York City, ATL = Atlanta)
+![](/Users/clevo570/Downloads/table1.png)
+4.Let PB be the probability that the Braves win a single head-to-head match-up with the Yankees, under the assumption that home field advantage doesn’t exist. Let PBH denote the probability that the Braves win a single head-to-head match-up with the Yankees as the home team (H for home). Let PBA denote the probability that the Braves win a single head-to-head match-up with the away team (A for away).
+
+![](/Users/clevo570/Downloads/table2.png)
+
+The rule of the World Series is BO7, that is, whoever wins 4 wins first is considered to be the winner, and will not play the rest of the game. In other words, 4, 5, 6, 7 games may be played last.
+
+# Methods
+
+1.Compute analytically the probability that the Braves win the world series when the sequence of game locations is {NYC, NYC, ATL, ATL, ATL, NYC, NYC}. (The code below computes the probability for the alternative sequence of game locations. Note: The code uses data.table syntax, which may be new to you. This is intential, as a gentle way to introduce data.table.) Calculate the probability with and without home field advantage when PB = 0.55. What is the difference in probabilities?
+
+```{r}
+require(dplyr)
+require(data.table)
+library(readr)
+library(tidyverse)
+```
+
+```{r}
+# Get all possible outcomes
+apo <- data.table::fread("/Users/clevo570/test_R/probability-and-inference-portfolio-chen-dong/04-home-field-advantage/all-possible-world-series-outcomes.csv")
+
+# Home field indicator
+hfi <- c(1,1,0,0,0,1,1) #{ATL, ATL, NYC, NYC, NYC, ATL, ATL}
+
+# P_B
+pb <- 0.55
+advantage_multiplier <- 1.1 # Set = 1 for no advantage
+
+fun1 <- function(hfi,advantage_multiplier,pb=0.55){
+  
+pbh <- 0.55*advantage_multiplier
+pba <- 1 - (1 - 0.55)*advantage_multiplier
+
+# Calculate the probability of each possible outcome
+apo[, p := NA_real_] # Initialize new column in apo to store prob
+for(i in 1:nrow(apo)){
+  prob_game <- rep(1, 7)
+  for(j in 1:7){
+    p_win <- ifelse(hfi[j], pbh, pba)
+    prob_game[j] <- case_when(
+        apo[i,j,with=FALSE] == "W" ~ p_win
+      , apo[i,j,with=FALSE] == "L" ~ 1 - p_win
+      , TRUE ~ 1
+    )
+  }
+  apo[i, p := prod(prob_game)] # Data.table syntax
+}
+
+# Sanity check: does sum(p) == 1?
+#apo[, sum(p)] # This is data.table notation
+
+# Probability of overall World Series outcomes
+apo[, sum(p), overall_outcome]
+}
+
+fun1(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1.1)
+fun1(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1)
+```
+
+In this case, if we think there is a home court advantage, the Braves win the world series when the sequence of game locations is {NYC, NYC, ATL, ATL, ATL, NYC, NYC} is 0.604221.
+
+If we think there is no home court advantage, the Braves win the world series when the sequence of game locations is {NYC, NYC, ATL, ATL, ATL, NYC, NYC} is 0.6082878.
+
+This probability is calculated by mathematics, not by simulation. The simulation method is described below.
+
+2.Calculate the same probabilities as the previous question by simulation.
+
+```{r}
+fun2 <- function(hfi,advantage_multiplier=1.1,pb=0.55){
+  pbh <- 0.55*advantage_multiplier
+  pba <- 1 - (1 - 0.55)*advantage_multiplier
+  wins=0
+  for(i in 1:7){
+    if (hfi[i]){
+      p_win=pbh}
+    else{
+      p_win=pba}
+    games=rbinom(1,1,p_win)
+    wins=games+wins
+    if (wins == 4 | (i-wins)==4) break
+  }
+  return(wins == 4)
+}
+```
+
+```{r}
+#with advantage
+adv=NA
+for(i in 1:100000){
+  adv[i]=fun2(hfi=c(0,0,1,1,1,0,0))  
+}
+
+mean(adv)
+
+#without advantage
+noadv=NA
+for(i in 1:100000){
+  noadv[i]=fun2(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1)  
+}
+
+mean(noadv)
+```
+
+In this case, if we think there is a home court advantage, the Braves win the world series when the sequence of game locations is {NYC, NYC, ATL, ATL, ATL, NYC, NYC} is 0.60214.
+
+If we think there is no home court advantage, the Braves win the world series when the sequence of game locations is {NYC, NYC, ATL, ATL, ATL, NYC, NYC} is 0.60946.
+
+This probability is calculated by simulation. it has some error comparing with results in Q1.
+
+3.What is the absolute and relative error for your simulation in the previous question?
+
+```{r}
+abs(mean(adv)-fun1(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1.1)$V[1])
+abs(mean(adv)-fun1(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1.1)$V[1])/fun1(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1)$V[1]
+
+abs(mean(noadv)-fun1(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1)$V[1])
+abs(mean(noadv)-fun1(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1)$V[1])/fun1(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1)$V[1]
+```
+
+The absolute error for simulation with a home court advantage is 0.002080972.
+
+The relative error for simulation with a home court advantage is 0.003421031.
+
+The absolute error for simulation without a home court advantage is 0.001172203.
+
+The relative error for simulation without a home court advantage is 0.001927053.
+
+4.**Bonus**. Does the difference in probabilites (with vs without home field advantage) depend on PB?
+
+I will figure out before Friday!
+
+5.**Bonus**. Does the difference in probabilites (with vs without home field advantage) depend on the advantage factor? (The advantage factor in PBH and PBA is the 1.1 multiplier that results in a 10% increase for the home team.)
+
+I will figure out before Friday!
+
+# Conclusions
+In this case, we assume it may have a home court advantage with 1.1 or not. To my surprise, so-called "home court advantage" does not theoretically change the result too much(0.04%). As a baseball fun, I think it may be true and in 2019 world series, Astros and Nationals defeated each other on opposite field. 
+
+However, I think it may need much to be detected. For example, advantage_multiplier may be not 1.1, sometimes it is hard to detect. Also, the referee sometimes affects the game. Also, in NHL Stanley Cup Finals, its is 2-2-1-1-1, which means the team with better record would play at Home, Home, Away, Away, Home, Away, Home. In other worlds, it makes sure The team with a better record must have no fewer home games than the opponent. It may have a different results comparing the situation we use.
+
+Another limitation is that PB is difficult to obtain or to verify accuracy. Actually, Yankees met Braves in ws several times. In 1996, Braves had Greg Maddux ,John Smoltzand Tom Glavine, who are 3 hof players, but they lost to Yankees 2-4. During that time, I believe PB is more than 0.55.
