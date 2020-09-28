@@ -9,3 +9,6 @@ https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/m
 
 03-discrete-probability-calculations
 https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/03-discrete-probability-calculations
+
+04-home-field-advantage
+https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/04-home-field-advantage
