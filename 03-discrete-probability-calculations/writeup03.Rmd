@@ -49,6 +49,7 @@ x <- seq(0.5,1,by=0.01)
 pbwin <- dbinom(4,7,x)+dbinom(5,7,x)+dbinom(6,7,x)+dbinom(7,7,x)
 plot(x,pbwin,type="l",main="Probability of winning the World Series",xlab="Probability of the Braves winning a head-to-head matchup",ylab="Pr(Win World Series)")
 ```
+
 Here is the figure that Braves win the WS. The first starts at p=0.01 and the second enlarges it that p starts from 0.5.
 As we can see, in general, it meets an S curve, which means it grows slowly first, then rapidly in the middle, finally slowly at the end. And the second meets a log curve.
 
@@ -90,7 +91,9 @@ From the figure, as PB,which is probability of the Braves winning a head-to-head
 
 
 5.Calculate P(PB = 0.55|Braves win World Series in 7 games) under the assumption that either PB = 0.55 or PB = 0.45. Explain your solution.
+
 ![](/Users/clevo570/Downloads/bayes.png)
+
 We can use Bayed Rule to  solve this question.We assume PB = 0.55 is event A, Braves win World Series in 7 games is event B. We want to calculate P(A|B), so we need to know P(B|A), which is p1 and P(B|┐A), which is p2 below. P(A)=P(B)=0.5. Thus we can calculate the answer.
 
 
@@ -104,15 +107,7 @@ p
 ```
 P(PB = 0.55|Braves win World Series in 7 games) is 0.55, which is shown above.(exact 7 games)
 
-The second one is Braves win in 7 or less games.
-```{r}
-p1 <- pbinom(3,7,0.55,lower.tail = FALSE)
-p2 <- pbinom(3,7,0.45,lower.tail = FALSE)
 
-p <- 0.5 * p1 / (0.5 * p1 + 0.5 *p2)
-p
-```
-P(PB = 0.55|Braves win World Series in 7 games) is 0.6082878, which is shown above.(7 or less games)
 
 # Conclusions
 In this simulation, we assume that PB is a constant number. But in actual baseball, especially in the World Series, it is not close to reality. Every team is striving for home advantage, because the home fiels increases the probability of winning. At the same time, the referee sometimes affects the game. Of course, some teams will cheat to gain an advantage (Houston Astros, it's you). 
