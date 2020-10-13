@@ -1,1 +1,339 @@
+---
+title: "Log Transform Deliverable"
+author: 'Dong Chen'
+date: "10-12"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
 
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+# Introduction
+It is common in the analysis of biological data to log transform data representing concentrations or data representing dose response. Here we are going to perform logarithmic transformation and explore the problem.
+
+
+# Method
+
+Part 1
+------
+
+-   For each distribution below, generate a figure of the PDF and CDF.
+    Mark the mean and median in the figure.
+
+-   For each distribution below, generate a figure of the PDF and CDF of
+    the transformation Y = log(X) random variable. Mark the mean and
+    median in the figure. You may use simulation or analytic methods in
+    order find the PDF and CDF of the transformation.
+
+-   For each of the distributions below, generate 1000 samples of
+    size 100. For each sample, calculate the geometric and arithmetic
+    mean. Generate a scatter plot of the geometic and arithmetic sample
+    means. Add the line of identify as a reference line.
+
+-   Generate a histogram of the difference between the arithmetic mean
+    and the geometric mean.
+
+### Distribution 1
+
+*X* ∼ GAMMA(shape = 3, scale = 1)
+
+[Interactive plot (link)](https://www.desmos.com/calculator/wgqdkl5ogl)
+
+```{r}
+shape=3
+scale=1
+x=seq(0,10,by=0.1)
+
+pdf=dgamma(x,shape,scale)
+mean.gam1=shape*scale
+median.gam1=qgamma(0.5,shape,scale)
+
+plot(x,pdf,type = "l",main="PDF of Gamma Distribution")
+#Mark the mean
+abline(v=mean.gam1,col="red")
+text(4, .05, "mean")
+#Mark the median
+abline(v=median.gam1,col="blue")
+text(2, .1, "median")
+```
+
+The Figure above is PDF of Gamma Distribution. Mean and median have been marked.
+
+```{r}
+x=seq(0,15,by=0.1)
+
+cdf=pgamma(x,shape,scale)
+plot(x,cdf,type = "l",main="CDF of Gamma Distribution")
+#Mark the mean
+abline(v=mean.gam1,col="red")
+text(4, .05, "mean")
+#Mark the median
+abline(v=median.gam1,col="blue")
+text(2, .1, "median")
+```
+
+The Figure above is PDF of Gamma Distribution. Mean and median have been marked.
+
+```{r}
+data1=rgamma(10000,shape,scale)
+
+#hist(data1,breaks=100)
+
+hist(log(data1),breaks=100)
+abline(v=mean(log(data1)),col="red")
+abline(v=median(log(data1)),col="blue")
+
+```
+
+Figure of the PDF of the transformation Y = log(X) random variable. Red line stands mean and blue line stands median.
+
+```{r}
+plot(ecdf(log(data1)))
+abline(v=mean(log(data1)),col="red")
+abline(v=median(log(data1)),col="blue")
+```
+
+Figure of the CDF of the transformation Y = log(X) random variable. Red line stands mean and blue line stands median.
+
+```{r}
+art.mean=NA
+geo.mean=NA
+for (i in 1:1000){
+  data2=rgamma(100,shape,scale)
+  art.mean[i]=mean(data2)
+  geo.mean[i]=exp(mean(log(data2)))
+}
+
+plot(c(1:1000),art.mean)
+plot(c(1:1000),geo.mean)
+```
+
+Scatter plot of the geometic and arithmetic sample means.
+
+```{r}
+plot(geo.mean,art.mean)
+abline(0,1)
+```
+
+Add a Reference line with geometic and arithmetic sample means.
+
+```{r}
+hist(art.mean)
+hist(geo.mean)
+```
+
+Histogram of the difference between the arithmetic mean and the geometric mean.
+
+### Distribution 2
+
+*X* ∼ LOG NORMAL(*μ* =  − 1, *σ* = 1)
+
+[Interactive plot (link)](https://www.desmos.com/calculator/rueernwrhl)
+
+```{r}
+lnmean=-1
+lnsd=1
+x=seq(0,10,by=0.01)
+
+pdf=dlnorm(x,lnmean,lnsd)
+mean.gam2=exp(lnmean+lnsd^2/2)
+median.gam2=qlnorm(0.5,lnmean,lnsd)
+
+plot(x,pdf,type = "l",main="PDF of Log Normal Distribution")
+#Mark the mean
+abline(v=mean.gam2,col="red")
+
+#Mark the median
+abline(v=median.gam2,col="blue")
+
+```
+
+The Figure above is PDF of Gamma Distribution. Mean and median have been marked. Red line stands mean and blue line stands median.
+
+```{r}
+x=seq(0,15,by=0.1)
+
+cdf=plnorm(x,lnmean,lnsd)
+plot(x,cdf,type = "l",main="CDF of Log Normal Distribution")
+#Mark the mean
+abline(v=mean.gam2,col="red")
+
+#Mark the median
+abline(v=median.gam2,col="blue")
+```
+
+The Figure above is PDF of Gamma Distribution. Mean and median have been marked.
+
+```{r}
+data3=rlnorm(10000,lnmean,lnsd)
+
+#hist(data1,breaks=100)
+
+hist(log(data3),breaks=100)
+abline(v=mean(log(data3)),col="red")
+abline(v=median(log(data3)),col="blue")
+
+```
+
+Figure of the PDF of the transformation Y = log(X) random variable. Red line stands mean and blue line stands median.
+
+```{r}
+plot(ecdf(log(data3)))
+abline(v=mean(log(data3)),col="red")
+abline(v=median(log(data3)),col="blue")
+```
+
+Figure of the CDF of the transformation Y = log(X) random variable. Red line stands mean and blue line stands median.
+
+```{r}
+art.mean=NA
+geo.mean=NA
+for (i in 1:1000){
+  data4=rlnorm(100,lnmean,lnsd)
+  art.mean[i]=mean(data4)
+  geo.mean[i]=exp(mean(log(data4)))
+}
+
+plot(c(1:1000),art.mean)
+plot(c(1:1000),geo.mean)
+```
+
+Scatter plot of the geometic and arithmetic sample means.
+
+```{r}
+plot(geo.mean,art.mean)
+abline(0,1)
+```
+
+Add a Reference line with geometic and arithmetic sample means.
+
+```{r}
+hist(art.mean)
+hist(geo.mean)
+```
+
+Histogram of the difference between the arithmetic mean and the geometric mean.
+
+
+### Distribution 3
+
+*X* ∼ UNIFORM(0, 12)
+
+```{r}
+min=0
+max=12
+x=seq(-5,15,by=0.01)
+
+pdf=dunif(x,min,max)
+mean.gam3=(min+max)/2
+median.gam3=qunif(0.5,min,max)
+
+plot(x,pdf,type = "l",main="PDF of Uniform Distribution")
+#Mark the mean
+abline(v=mean.gam3,col="red")
+
+#Mark the median
+abline(v=median.gam3,col="blue")
+
+```
+
+The Figure above is PDF of Gamma Distribution. Mean and median have been marked. Red line stands mean and blue line stands median.
+
+```{r}
+x=seq(-5,15,by=0.1)
+
+cdf=punif(x,min,max)
+plot(x,cdf,type = "l",main="CDF of Uniform Distribution")
+#Mark the mean
+abline(v=mean.gam3,col="red")
+
+#Mark the median
+abline(v=median.gam3,col="blue")
+```
+
+The Figure above is PDF of Gamma Distribution. Mean and median have been marked.
+
+```{r}
+data5=runif(10000,min,max)
+
+#hist(data1,breaks=100)
+
+hist(log(data5),breaks=100)
+abline(v=mean(log(data5)),col="red")
+abline(v=median(log(data5)),col="blue")
+
+```
+
+Figure of the PDF of the transformation Y = log(X) random variable. Red line stands mean and blue line stands median.
+
+```{r}
+plot(ecdf(log(data5)))
+abline(v=mean(log(data5)),col="red")
+abline(v=median(log(data5)),col="blue")
+```
+
+Figure of the CDF of the transformation Y = log(X) random variable. Red line stands mean and blue line stands median.
+
+```{r}
+art.mean=NA
+geo.mean=NA
+for (i in 1:1000){
+  data6=runif(100,min,max)
+  art.mean[i]=mean(data6)
+  geo.mean[i]=exp(mean(log(data6)))
+}
+
+plot(c(1:1000),art.mean)
+plot(c(1:1000),geo.mean)
+```
+
+Scatter plot of the geometic and arithmetic sample means.
+
+```{r}
+plot(geo.mean,art.mean)
+abline(0,1)
+```
+
+Add a Reference line with geometic and arithmetic sample means.
+
+```{r}
+hist(art.mean)
+hist(geo.mean)
+```
+
+Histogram of the difference between the arithmetic mean and the geometric mean.
+
+Part 2
+------
+
+Show that if *X*<sub>*i*</sub> \> 0 for all *i*, then the arithmetic
+mean is greater than or equal to the geometric mean.
+
+Hint: Start with the sample mean of the transformation
+*Y*<sub>*i*</sub> = log (*X*<sub>*i*</sub>).
+
+Method 1
+
+![](/Users/clevo570/Downloads/log_q2.png)
+
+Method 2
+
+![](/Users/clevo570/Downloads/log_q2-2.png)
+
+Part 3
+------
+
+What is the correct relationship between E [log (X)] and
+log(E[X])? Is one always larger? Equal? Explain your answer.
+
+![](/Users/clevo570/Downloads/log_q3.png)
