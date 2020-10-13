@@ -12,3 +12,6 @@ https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/m
 
 04-home-field-advantage
 https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/04-home-field-advantage
+
+05-log-transformation
+https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/05-log-transformation
