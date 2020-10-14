@@ -158,11 +158,88 @@ The relative error for simulation without a home court advantage is 0.001927053.
 
 4.**Bonus**. Does the difference in probabilites (with vs without home field advantage) depend on PB?
 
-I will figure out before Friday!
+```{r}
+pb <- 0.55
+advantage_multiplier <- 1.1 # Set = 1 for no advantage
+
+fun3 <- function(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1.1,pb=0.55){
+  
+pbh <- pb*advantage_multiplier
+pba <- 1 - (1 - pb)*advantage_multiplier
+
+# Calculate the probability of each possible outcome
+apo[, p := NA_real_] # Initialize new column in apo to store prob
+for(i in 1:nrow(apo)){
+  prob_game <- rep(1, 7)
+  for(j in 1:7){
+    p_win <- ifelse(hfi[j], pbh, pba)
+    prob_game[j] <- case_when(
+        apo[i,j,with=FALSE] == "W" ~ p_win
+      , apo[i,j,with=FALSE] == "L" ~ 1 - p_win
+      , TRUE ~ 1
+    )
+  }
+  apo[i, p := prod(prob_game)] # Data.table syntax
+}
+
+p_without <- pnbinom(3,4,pb)
+p_with <- apo[, sum(p), overall_outcome][[2]][[1]]
+return(p_with-p_without)
+}
+```
+
+```{r}
+pb_difference<-rep(NA,100)
+prob <- seq(0.01,1,by=0.01)
+for(i in 1:100){
+pb_difference[i]<-fun3(pb= prob[i])
+}
+
+plot(x=prob,y=pb_difference,type="l",xlab = "PB",ylab = "The difference in probabilities")
+```
+
+This picture shows that pb has an impact on difference in probabilities. And the magnitude of the impact is not always positive or negative. When the value of pb is about 0.35, difference in probabilities is the smallest negative number (the largest absolute value). When pb is about 0.7, difference in probabilities is the largest positive number.
 
 5.**Bonus**. Does the difference in probabilites (with vs without home field advantage) depend on the advantage factor? (The advantage factor in PBH and PBA is the 1.1 multiplier that results in a 10% increase for the home team.)
 
-I will figure out before Friday!
+```{r}
+fun4 <- function(hfi=c(0,0,1,1,1,0,0),advantage_multiplier=1.1,pb=0.55){
+  
+pbh <- pb*advantage_multiplier
+pba <- 1 - (1 - pb)*advantage_multiplier
+
+# Calculate the probability of each possible outcome
+apo[, p := NA_real_] # Initialize new column in apo to store prob
+for(i in 1:nrow(apo)){
+  prob_game <- rep(1, 7)
+  for(j in 1:7){
+    p_win <- ifelse(hfi[j], pbh, pba)
+    prob_game[j] <- case_when(
+        apo[i,j,with=FALSE] == "W" ~ p_win
+      , apo[i,j,with=FALSE] == "L" ~ 1 - p_win
+      , TRUE ~ 1
+    )
+  }
+  apo[i, p := prod(prob_game)] # Data.table syntax
+}
+
+am_without = 0.6082878
+am_with <- apo[, sum(p), overall_outcome][[2]][[1]]
+return(am_with-am_without)
+}
+```
+
+```{r}
+am_difference<-rep(NA,100)
+am <- seq(1.01,2,by=0.01)
+for(i in 1:100){
+am_difference[i]<-fun4(advantage_multiplier= am[i])
+}
+
+plot(x=am,y=am_difference,type="l",xlab = "Advantage Multiplier",ylab = "The difference in probabilities")
+```
+
+This picture shows that advantage multiplier has an impact on difference in probabilities. The image is monotonous downwards, that is, the absolute value is getting bigger , which means the difference is getting bigger. And the trend is getting faster and faster.In general, the advantage multiplier of baseball will not be very large. Therefore, under normal circumstances, the difference will not exceed 10%.
 
 # Conclusions
 In this case, we assume it may have a home court advantage with 1.1 or not. To my surprise, so-called "home court advantage" does not theoretically change the result too much(0.04%). As a baseball fun, I think it may be true and in 2019 world series, Astros and Nationals defeated each other on opposite field. 
