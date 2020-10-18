@@ -130,6 +130,7 @@ Add a Reference line with geometic and arithmetic sample means.
 ```{r}
 hist(art.mean)
 hist(geo.mean)
+hist(art.mean-geo.mean)
 ```
 
 Histogram of the difference between the arithmetic mean and the geometric mean.
@@ -220,6 +221,7 @@ Add a Reference line with geometic and arithmetic sample means.
 ```{r}
 hist(art.mean)
 hist(geo.mean)
+hist(art.mean-geo.mean)
 ```
 
 Histogram of the difference between the arithmetic mean and the geometric mean.
@@ -309,6 +311,7 @@ Add a Reference line with geometic and arithmetic sample means.
 ```{r}
 hist(art.mean)
 hist(geo.mean)
+hist(art.mean-geo.mean)
 ```
 
 Histogram of the difference between the arithmetic mean and the geometric mean.
