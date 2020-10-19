@@ -15,3 +15,6 @@ https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/m
 
 05-log-transformation
 https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/05-log-transformation
+
+06-order-statistics
+https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/06-order-statistics
