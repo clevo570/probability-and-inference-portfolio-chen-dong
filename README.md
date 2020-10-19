@@ -18,3 +18,5 @@ https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/m
 
 06-order-statistics
 https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/06-order-statistics
+
+QQPlot ref: https://github.com/thomasgstewart/data-science-5620-fall-2020/blob/master/deliverables/06-order-statistics.md
