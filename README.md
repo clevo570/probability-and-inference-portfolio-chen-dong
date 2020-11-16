@@ -23,3 +23,6 @@ QQPlot ref: https://github.com/thomasgstewart/data-science-5620-fall-2020/blob/m
 
 07-mle-and-mm
 https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/07-mle-and-mm
+
+08-coverage-probability
+https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/08-coverage-probability
