@@ -1,1 +1,156 @@
+---
+title: "Order Statistic Deliverable"
+author: 'Dong Chen'
+date: "10-19"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+# Introduction
+
+Coverage probability is an important operating characteristic of methods for constructing interval estimates, particularly confidence intervals.
+
+## Background
+
+**Definition:** Define the 95%
+confidence interval of the median to be the middle 95% of sampling
+distribution of the median. Similarly, the 95% confidence interval of
+the mean, standard deviation, etc. is the middle 95% of the respective
+sampling distribution.
+
+**Definition:** Define the
+coverage probability as the long run proportion of intervals that
+capture the population parameter of interest. Conceptualy, one can
+calculate the coverage probability with the following steps
+
+1.  generate a sample of size *N* from a known distribution
+2.  construct a confidence interval
+3.  determine if the confidence captures the population parameter
+4.  Repeat steps (1) - (3) many times. Estimate the coverage probability
+    as the proportion of samples for which the confidence interval
+    captured the population parameter.
+
+Idealy, a 95% confidence interval will capture the population parameter of interest in 95% of samples. I will perform a simulation to calculate the
+coverage probability of the 95% confidence interval of the median when
+computed from *F̂*<sub>*X*</sub><sup>*m**l**e*</sup>. 
+ 
+# Methods
+
+**Step:** Generate a single sample from a standard normal distribution of size *N* = 201. Explain to the reader how you use MLE to estimate the distribution.
+
+```{r}
+N = 201
+data = rnorm(N)
+mle.mean <- mean(data)
+mle.sd <- sqrt(((N-1)/N)*var(data))
+
+hist(data, freq = F)
+curve(dnorm(x,mle.mean,mle.sd),add=T)
+```
+
+We set the sample size to 201 and simulated the normal distribution. According to the theorem of sample distribution, after using MLE, we can plot its distribution(hist) and theoretical distribution(curve).
+
+**Step:** Show the reader how you approximate the sampling distribution of the median, conditional on the estimate of the distribution in the previous step.
+
+```{r}
+n = 5000
+meds= NA
+
+for(i in 1:n){
+  re.samp = rnorm(N,mle.mean,mle.sd)
+  meds[i] = median(re.samp)
+}
+
+meds = rbeta(5000,101,101) %>% qnorm(mle.mean,mle.sd)
+
+hist(meds)
+```
+
+We set 5000 simulations, and the median of each simulation was plotted as above.
+
+**Step:** Describe how you calculate a 95% confidence interval from the approximated sampling distribution.
+
+```{r}
+quantile(meds,c(0.025,0.975))
+```
+
+we use quantile() function to get the 95% confidence interval, 95% confidence that the median is between `r quantile(meds,c(0.025,0.975))[1]` and `r quantile(meds,c(0.025,0.975))[2]`.
+
+**Step:** Explain the concept of coverage probability. Explain your code for calculating the coverage probability.
+
+```{r}
+gen.ci.med = function(n=5000,N=201,parm.int=0){
+  data = rnorm(N)
+  mle.mean <- mean(data)
+  mle.sd <- sqrt(((N-1)/N)*var(data))
+  meds = rbeta(5000,101,101) %>% qnorm(mle.mean,mle.sd)
+  ci = quantile(meds,c(0.025,0.975))
+  return(ci)
+}
+
+ci.contain = NA
+ci.min = NA
+ci.max = NA
+for(i in 1:1000){
+  ci.min[i] = gen.ci.med()[1]
+  ci.max[i] = gen.ci.med()[2]
+  ci.contain[i] = (ci.min[i] < 0 & ci.max[i] > 0)
+}
+```
+
+Coverage probability represents the probability that the minimum and maximum values of the above step cross 0. Here we conduct 1000 experiments, and each experiment has a result.
+
+We first set up an function, some parameters can be set by ourselves, such as the default override value (here is 0), the number of simulations and the number of samples. Through the function, we loop 1000 times.
+
+```{r}
+mean(ci.contain)
+```
+
+The coverage probability here is `r mean(ci.contain)`, which also means `r mean(ci.contain)*1000` in 1000 experiments override 0.
+
+**Step:** Perform the simulation and report the results.
+
+```{r}
+sim_result <- data.frame("min" = ci.min, "max" = ci.max, "result" = ci.contain,"N" = 1:1000)
+```
+
+```{r}
+ggplot(sim_result) +
+geom_linerange(aes(x = N,
+                     ymin = min,
+                     ymax = max),
+              
+                     color = case_when(sim_result$result == 1 ~ "blue" , sim_result$result == 0 ~ "red")) +
+  
+  
+  geom_hline(yintercept = 0, color = "gray") +
+  coord_flip() +
+  theme_bw()
+```
+
+Here is the figure of the simulation. The blue lines show they are in the coverage and the red lines show they are not overrided.
+
+**Step:** Describe how you might change the simulation to learn more about the operating characteristics of your chosen method for constructing the 95% confidence interval.
+
+We can do more simulations. Similarly, due to the particularity of the normal distribution, we can change it to other distributions, especially asymmetric distributions, such as logarithmic distributions. Similarly, it is sometimes difficult for us to calculate the theoretical probability, and it is difficult to find a comparison.
+
+
 
