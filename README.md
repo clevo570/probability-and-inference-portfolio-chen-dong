@@ -26,3 +26,6 @@ https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/m
 
 08-coverage-probability
 https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/08-coverage-probability
+
+10-CLT-approximation
+https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/10-CLT-approximation
