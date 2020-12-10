@@ -29,3 +29,6 @@ https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/m
 
 10-CLT-approximation
 https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/10-CLT-approximation
+
+99-final-exam
+https://github.com/clevo570/probability-and-inference-portfolio-chen-dong/tree/master/99-final-exam
